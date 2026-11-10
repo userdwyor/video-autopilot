@@ -15,8 +15,8 @@ llm:
 
 tts:
   provider: edge               # edge (free, no key) | elevenlabs (premium)
-  speed: 1.08                  # 1.05–1.15 reads energetic; Playbook §2
-  edge_voice: en-US-AriaNeural # see `edge-tts --list-voices`
+  speed: 1.0                   # 1.05–1.15 reads energetic; Playbook §2
+  edge_voice: id-ID-GadisNeural # see `edge-tts --list-voices`
   edge_rate: "+0%"             # extra pacing on top of speed; e.g. "+8%"
   edge_pitch: "+0Hz"           # subtle warmth/energy; e.g. "+2Hz"
   elevenlabs_voice: Rachel     # ElevenLabs voice name/id (premium = best audio)
