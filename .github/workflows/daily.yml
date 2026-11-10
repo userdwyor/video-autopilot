@@ -61,6 +61,7 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          UPLOAD_POST_API_KEY: ${{ secrets.UPLOAD_POST_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           FAL_KEY: ${{ secrets.FAL_KEY }}
@@ -99,3 +100,6 @@ jobs:
             output/**/metadata.json
           if-no-files-found: ignore
           retention-days: 7
+      - name: Upload to Social Media
+        if: always()
+        run: python upload_socials.py
