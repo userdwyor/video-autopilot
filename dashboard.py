@@ -60,10 +60,11 @@ st.subheader("🚀 Produksi Video Baru")
 if st.button("BUAT VIDEO SEKARANG!", use_container_width=True, type="primary"):
     dispatch_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/workflows/daily.yml/dispatches"
     payload = {
-        "ref": "main",
-        "inputs": {
-            "dry_run": "true" # Biar cuma bikin video, ga langsung upload
-        }
+    "ref": "main",
+    "inputs": {
+        "dry_run": True, 
+        "channel": ""
+    }
     }
     response = requests.post(dispatch_url, headers=headers, json=payload)
     
