@@ -83,10 +83,5 @@ st.write("Geser layar pakai jari buat muter ruangannya!")
 import streamlit.components.v1 as components
 import os
 
-if os.path.exists("office.html"):
-    with open("office.html", "r", encoding="utf-8") as f:
-        html_data = f.read()
-    components.html(html_data, height=500, scrolling=True)
-else:
-    st.error("File office.html nggak ketemu di repo.")
+components.iframe("https://userdwyor.github.io/video-autopilot/office.html", height=500, scrolling=True)
 st.caption("Dibuat dengan 💻 dan ☕ oleh Bos Besar.")
