@@ -1,18 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Agent 3D Cartoon Office</title>
+    <title>Isometric AI Office</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #fce4ec; }
-        #info { position: absolute; top: 10px; width: 100%; text-align: center; color: #333; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; z-index: 100; pointer-events: none; }
-        h2 { margin: 5px; text-shadow: 1px 1px 2px white; }
+        body { margin: 0; overflow: hidden; background-color: #f0f4f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* UI Overlay untuk Feed Aktivitas */
+        #activity-feed {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 10px 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        #activity-feed h4 { margin: 0 0 5px 0; font-size: 14px; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
+        .log-item { font-size: 12px; margin-bottom: 3px; color: #555; display: flex; align-items: center; gap: 5px;}
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+        /* Label Nama Melayang */
+        .name-tag {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            pointer-events: none;
+            transform: translateY(-10px);
+        }
     </style>
 </head>
 <body>
-    <div id="info"><h2>🏢 Kantor Virtual Tim AI</h2><p>Geser layar buat muter ruangan!</p></div>
-    
+    <!-- Feed Aktivitas Bawah -->
+    <div id="activity-feed">
+        <h4>📋 Aktivitas Kantor (Live)</h4>
+        <div id="log-list">
+            <div class="log-item"><span class="dot" style="background:#ff5252"></span> <b>Manager:</b> Lagi muter ngawasin kerjaan...</div>
+            <div class="log-item"><span class="dot" style="background:#7c4dff"></span> <b>Scriptwriter:</b> Ngetik naskah video baru...</div>
+            <div class="log-item"><span class="dot" style="background:#4caf50"></span> <b>Budi:</b> Lagi sholat dulu ya...</div>
+            <div class="log-item"><span class="dot" style="background:#ff9800"></span> <b>Sinta:</b> Main bola biar otak fresh...</div>
+        </div>
+    </div>
+
     <script type="importmap">
       {
         "imports": {
@@ -25,194 +63,179 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-        // Setup Scene
+        // --- SETUP DASAR ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xe0f7fa); // Warna langit pastel
-        scene.fog = new THREE.Fog(0xe0f7fa, 20, 50);
+        scene.background = new THREE.Color(0xe3f2fd);
 
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(15, 15, 15);
+        // KAMERA ISOMETRIK
+        const aspect = window.innerWidth / window.innerHeight;
+        const frustumSize = 30;
+        const camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 1000);
+        camera.position.set(20, 20, 20); // Posisi miring dari atas
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Shadow lebih halus (kartun)
         document.body.appendChild(renderer.domElement);
 
+        // RENDERER UNTUK NAMA TAG
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+
+        // KONTROL
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.maxPolarAngle = Math.PI / 2 - 0.05;
+        controls.enableRotate = false; // Matiin rotate biar tetep isometrik
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
 
-        // Lighting (Pencahayaan studio kartun)
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffe082, 1.5);
-        scene.add(hemiLight);
-
+        // --- PENCAHAYAAN ---
+        scene.add(new THREE.AmbientLight(0xffffff, 1.2));
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
         dirLight.position.set(10, 20, 10);
         dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 1024;
-        dirLight.shadow.mapSize.height = 1024;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.left = -20;
+        dirLight.shadow.camera.right = 20;
+        dirLight.shadow.camera.top = 20;
+        dirLight.shadow.camera.bottom = -20;
         scene.add(dirLight);
 
-        // Lantai (Warna karpet pastel)
-        const floorGeo = new THREE.PlaneGeometry(40, 40);
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0xfff9c4, roughness: 0.9 });
+        // --- LANTAI & DINDING ---
+        // Lantai Utama
+        const floorGeo = new THREE.PlaneGeometry(24, 24);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5 });
         const floor = new THREE.Mesh(floorGeo, floorMat);
         floor.rotation.x = -Math.PI / 2;
         floor.receiveShadow = true;
         scene.add(floor);
 
-        // Hiasan Tanaman
-        function createPlant(x, z) {
-            const plantGroup = new THREE.Group();
-            const potGeo = new THREE.CylinderGeometry(0.6, 0.4, 1, 8);
-            const potMat = new THREE.MeshStandardMaterial({ color: 0xff8a65 });
-            const pot = new THREE.Mesh(potGeo, potMat);
-            pot.position.y = 0.5; pot.castShadow = true;
-            plantGroup.add(pot);
-            
-            const leafGeo = new THREE.SphereGeometry(0.8, 8, 8);
-            const leafMat = new THREE.MeshStandardMaterial({ color: 0x81c784 });
-            const leaf = new THREE.Mesh(leafGeo, leafMat);
-            leaf.position.y = 1.5; leaf.castShadow = true;
-            plantGroup.add(leaf);
-
-            plantGroup.position.set(x, 0, z);
-            scene.add(plantGroup);
+        // Fungsi Bikin Lantai Warna (Zona)
+        function createZone(x, z, w, h, color) {
+            const geo = new THREE.PlaneGeometry(w, h);
+            const mat = new THREE.MeshStandardMaterial({ color: color });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.set(x, 0.01, z);
+            mesh.receiveShadow = true;
+            scene.add(mesh);
         }
-        createPlant(-12, -12); createPlant(12, -12); createPlant(-12, 12); createPlant(12, 12);
+        // Zona Kantor (Biru), Santai (Hijau), Sholat (Kuning)
+        createZone(-6, -6, 10, 10, 0xbbdefb); // Kiri Atas
+        createZone(6, 6, 10, 10, 0xc8e6c9);   // Kanan Bawah
+        createZone(-6, 6, 10, 10, 0xfff9c4);  // Kiri Bawah
+        createZone(6, -6, 10, 10, 0xffffff);  // Kanan Atas
 
-        // Karakter Agent
-        function createAgent(color) {
-            const agent = new THREE.Group();
-            
+        // Dinding (Sederhana)
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        function createWall(x, z, w, h, d) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mesh = new THREE.Mesh(geo, wallMat);
+            mesh.position.set(x, h/2, z);
+            mesh.castShadow = true; mesh.receiveShadow = true;
+            scene.add(mesh);
+        }
+        createWall(0, -12, 24, 4, 0.5); // Dinding belakang
+        createWall(-12, 0, 0.5, 4, 24); // Dinding kiri
+        createWall(0, 0, 24, 3, 0.5); // Sekat tengah horizontal
+        createWall(0, 0, 0.5, 3, 24); // Sekat tengah vertikal
+
+        // --- KARAKTER & NAMA TAG ---
+        function createAgent(name, color, x, z) {
+            const agentGroup = new THREE.Group();
+            agentGroup.position.set(x, 0, z);
+
             // Badan
-            const bodyGeo = new THREE.CapsuleGeometry(0.6, 1.2, 4, 8);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: color });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.5, 1, 4, 8), new THREE.MeshStandardMaterial({ color: color }));
             body.position.y = 1.2; body.castShadow = true;
-            agent.add(body);
+            agentGroup.add(body);
 
             // Kepala
-            const headGeo = new THREE.SphereGeometry(0.7, 16, 16);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0xffcc80 }); // Warna kulit
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.y = 2.5; head.castShadow = true;
-            agent.add(head);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffcc80 }));
+            head.position.y = 2.3; head.castShadow = true;
+            agentGroup.add(head);
 
-            // Mata
-            const eyeGeo = new THREE.SphereGeometry(0.1, 8, 8);
-            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const eyeL = new THREE.Mesh(eyeGeo, eyeMat); eyeL.position.set(-0.25, 2.6, 0.6);
-            const eyeR = new THREE.Mesh(eyeGeo, eyeMat); eyeR.position.set(0.25, 2.6, 0.6);
-            agent.add(eyeL); agent.add(eyeR);
+            // Nama Tag (HTML)
+            const div = document.createElement('div');
+            div.className = 'name-tag';
+            div.textContent = name;
+            const label = new CSS2DObject(div);
+            label.position.set(0, 3.2, 0);
+            agentGroup.add(label);
 
-            return agent;
+            scene.add(agentGroup);
+            return agentGroup;
         }
 
-        // --- SETUP KANTOR & AKTIVITAS ---
+        // 1. Manager (Biru) - Jalan
+        const manager = createAgent("Manager", 0x42a5f5, -6, -6);
+        // 2. Scriptwriter (Ungu) - Ngetik
+        const writer = createAgent("Sinta", 0xab47bc, 6, -6);
+        // 3. Sholat (Hijau) - Rukuk
+        const prayer = createAgent("Budi", 0x66bb6a, -6, 6);
+        // 4. Main (Oranye) - Loncat
+        const player = createAgent("Andi", 0xffa726, 6, 6);
 
-        // 1. Manager: Jalan bolak-balik
-        const manager = createAgent(0x64b5f6); // Biru
-        manager.position.set(-6, 0, -6);
-        scene.add(manager);
-
-        // 2. Scriptwriter: Duduk Ngetik
-        const writer = createAgent(0xba68c8); // Ungu
-        writer.position.set(6, 0, -6);
-        scene.add(writer);
+        // --- PROPERTI ---
         // Meja Ngetik
-        const deskGeo = new THREE.BoxGeometry(2, 1, 1.5);
-        const deskMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae });
-        const desk = new THREE.Mesh(deskGeo, deskMat);
-        desk.position.set(6, 0.5, -5);
-        desk.castShadow = true; desk.receiveShadow = true;
-        scene.add(desk);
-
-        // 3. Sholat: Pakai Sajadah
-        const prayer = createAgent(0x81c784); // Hijau
-        prayer.position.set(-6, 0, 6);
-        scene.add(prayer);
+        const desk = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 2), new THREE.MeshStandardMaterial({ color: 0x8d6e63 }));
+        desk.position.set(6, 0.5, -5); desk.castShadow = true; scene.add(desk);
+        
         // Sajadah
-        const matGeo = new THREE.PlaneGeometry(2, 3);
-        const matMat = new THREE.MeshStandardMaterial({ color: 0x4db6ac });
-        const prayerMat = new THREE.Mesh(matGeo, matMat);
-        prayerMat.rotation.x = -Math.PI / 2;
-        prayerMat.position.set(-6, 0.01, 7); // Sedikit di atas lantai
-        prayerMat.receiveShadow = true;
-        scene.add(prayerMat);
+        const mat = new THREE.Mesh(new THREE.PlaneGeometry(2, 3), new THREE.MeshStandardMaterial({ color: 0x4db6ac }));
+        mat.rotation.x = -Math.PI / 2; mat.position.set(-6, 0.02, 7); mat.receiveShadow = true; scene.add(mat);
 
-        // 4. Main Bola: Karakter Loncat-loncat
-        const player = createAgent(0xffb74d); // Oranye
-        player.position.set(6, 0, 6);
-        scene.add(player);
         // Bola
-        const ballGeo = new THREE.SphereGeometry(0.4, 16, 16);
-        const ballMat = new THREE.MeshStandardMaterial({ color: 0xe53935 });
-        const ball = new THREE.Mesh(ballGeo, ballMat);
-        ball.castShadow = true;
-        scene.add(ball);
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.4), new THREE.MeshStandardMaterial({ color: 0xe53935 }));
+        ball.castShadow = true; scene.add(ball);
 
-        // 5. Ngopi: Karakter di tengah
-        const coffee = createAgent(0xf06292); // Pink
-        coffee.position.set(0, 0, 0);
-        scene.add(coffee);
-        // Meja Kopi
-        const tableGeo = new THREE.CylinderGeometry(1, 1, 1.5, 16);
-        const tableMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
-        const table = new THREE.Mesh(tableGeo, tableMat);
-        table.position.set(2, 0.75, 0);
-        table.castShadow = true;
-        scene.add(table);
-
-        // --- ANIMASI LOOP ---
+        // --- ANIMASI ---
         const clock = new THREE.Clock();
-
         function animate() {
             requestAnimationFrame(animate);
             const time = clock.getElapsedTime();
 
-            // 1. Manager jalan (geser X)
+            // Manager jalan
             manager.position.x = -6 + Math.sin(time * 1.5) * 3;
-            // Rotasi badan manager sesuai arah jalan
-            manager.rotation.y = Math.cos(time * 1.5) > 0 ? 0 : Math.PI;
+            manager.rotation.y = Math.cos(time * 1.5) > 0 ? Math.PI/2 : -Math.PI/2;
 
-            // 2. Scriptwriter ngetik (bobbing naik turun)
-            writer.position.y = Math.abs(Math.sin(time * 10)) * 0.1;
+            // Sinta ngetik
+            writer.position.y = Math.abs(Math.sin(time * 10)) * 0.15;
+            writer.rotation.y = Math.PI; // Ngadep meja
 
-            // 3. Sholat (Rukuk & Sujud)
-            // Kita pakai siklus sinus buat gerakin rotasi X (nunduk)
-            const prayCycle = Math.sin(time * 0.5); // Pelan aja
+            // Budi Sholat
+            const prayCycle = Math.sin(time * 0.8);
             if (prayCycle > 0.5) {
-                // Posisi Sujud
-                prayer.rotation.x = -Math.PI / 3;
-                prayer.position.y = -0.5; // Turun ke bawah
+                prayer.rotation.x = -Math.PI / 3; prayer.position.y = -0.4;
             } else {
-                // Posisi Berdiri
-                prayer.rotation.x = 0;
-                prayer.position.y = 0;
+                prayer.rotation.x = 0; prayer.position.y = 0;
             }
 
-            // 4. Main Bola (Loncat-loncat ngejar bola)
-            player.position.y = Math.abs(Math.sin(time * 4)) * 1.5; // Loncat
-            // Bola muter dan mantul
-            ball.position.set(6 + Math.cos(time * 4) * 2, 0.4 + Math.abs(Math.sin(time * 8)) * 1, 6);
-            ball.rotation.x += 0.05;
-            ball.rotation.z += 0.05;
+            // Andi Main Bola
+            player.position.y = Math.abs(Math.sin(time * 4)) * 1.5;
+            ball.position.set(6 + Math.cos(time * 3) * 2, 0.4 + Math.abs(Math.sin(time * 6)) * 1.5, 6 + Math.sin(time * 3) * 2);
+            ball.rotation.x += 0.05; ball.rotation.z += 0.05;
 
-            // 5. Ngopi (Karakter goyang-goyang santai)
-            coffee.rotation.z = Math.sin(time * 2) * 0.05;
-            coffee.rotation.y = Math.sin(time * 0.5) * 0.2;
-
-            controls.update();
             renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
         }
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.left = -frustumSize * aspect / 2;
+            camera.right = frustumSize * aspect / 2;
+            camera.top = frustumSize / 2;
+            camera.bottom = -frustumSize / 2;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
         });
 
         animate();
