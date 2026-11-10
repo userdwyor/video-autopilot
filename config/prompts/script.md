@@ -1,4 +1,5 @@
 IMPORTANT RULES FOR THIS TASK:
+"Write the script as a scary short story. Build tension and end with a plot twist." (Tulis naskah sebagai cerita horor pendek. Bangun ketegangan dan akhiri dengan plot twist).
 1. LANGUAGE: Write the entire script (hook, beats, closer, full_script, on_screen_title) in casual, engaging INDONESIAN (Bahasa Indonesia). Do NOT write the script in English.
 2. VISUAL STYLE: For the "visual_cue", ALWAYS add search terms like "2D cartoon", "anime style", "illustration", or "animated background" so it matches our cartoon channel.
 3. Keep the JSON keys and structure exactly as requested below. Only translate the script content.
