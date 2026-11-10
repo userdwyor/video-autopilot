@@ -52,40 +52,41 @@ def gather_visuals(cfg: dict, script: dict, out_dir: Path, duration: float) -> l
 
 
 def _pexels_video(query: str, dest: Path, cfg: dict, used_ids: Optional[set] = None) -> Path:
-    key = env("PEXELS_API_KEY")
+    key = env("PIXABAY_API_KEY")
     if not key:
-        raise SystemExit("PEXELS_API_KEY missing in .env")
+        raise SystemExit("PIXABAY_API_KEY missing in .env")
     used_ids = used_ids if used_ids is not None else set()
+    
+    # Menggunakan API Pixabay
     r = requests.get(
-        "https://api.pexels.com/videos/search",
-        headers={"Authorization": key},
-        params={"query": query, "orientation": "portrait", "per_page": 12, "size": "large"},
+        "https://pixabay.com/api/videos/",
+        params={"key": key, "q": query, "video_type": "film", "orientation": "vertical", "per_page": 15},
         timeout=30,
     )
     r.raise_for_status()
-    videos = r.json().get("videos", [])
+    videos = r.json().get("hits", [])
     if not videos:
-        raise RuntimeError("no Pexels results")
+        raise RuntimeError("No Pixabay results")
 
-    # Prefer a fresh result (not already used) so consecutive clips differ.
+    # Ambil video yang belum dipakai
     fresh = [v for v in videos if v.get("id") not in used_ids] or videos
     video = fresh[0]
     used_ids.add(video.get("id"))
 
-    # Pick a crisp portrait file: tall enough for 1080x1920 but not absurdly large.
-    portrait = [f for f in video["video_files"]
-                if (f.get("height") or 0) >= (f.get("width") or 0)]
-    pool = portrait or video["video_files"]
-    files = sorted(
-        pool,
-        key=lambda f: (abs((f.get("height") or 0) - 1920), -(f.get("width") or 0)),
-    )
-    url = files[0]["link"]
+    # Ambil URL video resolusi menengah/besar
+    video_files = video.get("videos", {})
+    url = None
+    for size in ["medium", "large", "small"]:
+        if size in video_files and video_files[size].get("url"):
+            url = video_files[size].get("url")
+            break
+            
+    if not url:
+        raise RuntimeError("No suitable video URL found in Pixabay")
+        
     out = dest.with_suffix(".mp4")
     out.write_bytes(requests.get(url, timeout=120).content)
     return out
-
-
 def _ai_image(prompt: str, dest: Path, cfg: dict, provider: str) -> Path:
     style = cfg["visuals"].get("ai_image_style", "")
     full = f"{prompt}, {style}"
