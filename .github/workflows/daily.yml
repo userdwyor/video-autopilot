@@ -101,4 +101,6 @@ jobs:
           retention-days: 7
       - name: Upload to Social Media
         if: always()
+        env:
+          UPLOAD_POST_API_KEY: ${{ secrets.UPLOAD_POST_API_KEY }}
         run: python upload_socials.py
