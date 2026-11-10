@@ -88,7 +88,7 @@
         }
 
         const loader = new GLTFLoader();
-        loader.load('https://cdn.jsdelivr.net/gh/userdwyor/video-autopilot@main/office.glb', function (gltf) {
+        loader.load('office.glb', function (gltf) {
             const model = gltf.scene;
             // KITA KECILIN SEDIKIT GEDUNGNYA BIAR PROPORSIONAL
             model.scale.set(0.5, 0.5, 0.5); 
