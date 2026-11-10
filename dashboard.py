@@ -7,7 +7,6 @@ st.set_page_config(page_title="AI Studio Control Room", page_icon="🎬", layout
 st.title("🎬 AI Studio Control Room")
 st.write("Selamat datang, Bos! Dari sini lo bisa ngontrol pabrik video lo tanpa buka GitHub.")
 
-# Ambil token dari Streamlit Secrets
 try:
     GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
     REPO_OWNER = st.secrets["REPO_OWNER"]
@@ -21,7 +20,6 @@ headers = {
     "Accept": "application/vnd.github.v3+json"
 }
 
-# Fungsi buat ngecek status terakhir
 def get_latest_run():
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/runs"
     response = requests.get(url, headers=headers)
@@ -32,7 +30,6 @@ def get_latest_run():
                 return run
     return None
 
-# Tampilkan Status Terakhir
 st.divider()
 st.subheader("📊 Status Pabrik Terakhir")
 latest_run = get_latest_run()
@@ -53,25 +50,29 @@ if latest_run:
 else:
     st.warning("Belum ada riwayat produksi.")
 
-# Tombol Buat Video Baru
 st.divider()
 st.subheader("🚀 Produksi Video Baru")
 
 if st.button("BUAT VIDEO SEKARANG!", use_container_width=True, type="primary"):
     dispatch_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/workflows/daily.yml/dispatches"
+    
+    # Kita kirim format yang paling aman (sesuai tipe data di YAML)
     payload = {
-    "ref": "main",
-    "inputs": {
-        "dry_run": True, 
-        "channel": ""
+        "ref": "main",
+        "inputs": {
+            "dry_run": True, 
+            "channel": ""
+        }
     }
-    }
+    
     response = requests.post(dispatch_url, headers=headers, json=payload)
     
     if response.status_code == 204:
         st.success("✅ Perintah diterima! Pabrik mulai bekerja. Tunggu 15-20 menit, terus refresh halaman ini buat cek status.")
     else:
-        st.error(f"❌ Gagal ngasih perintah. Error: {response.status_code}")
+        st.error(f"❌ Gagal ngasih perintah. Error Code: {response.status_code}")
+        st.write("**Pesan Error dari GitHub:**")
+        st.code(response.text) # INI BAKAL NAMPILIN ERROR ASLINYA
 
 st.divider()
 st.caption("Dibuat dengan 💻 dan ☕ oleh Bos Besar.")
