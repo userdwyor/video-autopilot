@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Realistic Office + Agents</title>
+    <title>3D Office + Agents</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #e0f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #loading {
@@ -35,14 +35,13 @@
         scene.background = new THREE.Color(0xe0f7fa);
 
         const aspect = window.innerWidth / window.innerHeight;
-        const frustumSize = 20; // Ubah ke 25 atau 30 kalau ruangannya kurang kelihatan
+        const frustumSize = 20; 
         const camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 1000);
         camera.position.set(15, 15, 15);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
         document.body.appendChild(renderer.domElement);
 
         // Renderer buat Nama Tag
@@ -64,38 +63,34 @@
         const dirLight = new THREE.DirectionalLight(0xffffff, 2);
         dirLight.position.set(10, 20, 10);
         dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048; dirLight.shadow.mapSize.height = 2048;
         scene.add(dirLight);
 
-        // --- FUNGSI BIKIN KARAKTER ---
+        // Variabel buat nampung karyawan
+        let manager, writer, researcher, player, editor, admin, designer;
+        let isLoaded = false;
+
         function createAgent(name, color, x, y, z) {
             const agentGroup = new THREE.Group();
-            // Posisi X, Y, Z (Y itu buat naikin/turunin)
             agentGroup.position.set(x, y, z);
-
             // Badan
             const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 0.6, 4, 8), new THREE.MeshStandardMaterial({ color: color }));
             body.position.y = 0.7; body.castShadow = true; agentGroup.add(body);
-            
             // Kepala
             const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffcc80 }));
             head.position.y = 1.4; head.castShadow = true; agentGroup.add(head);
-
-            // Nama Tag
+            // Nama
             const div = document.createElement('div'); div.className = 'name-tag'; div.textContent = name;
             const label = new CSS2DObject(div); label.position.set(0, 2, 0); agentGroup.add(label);
-
             scene.add(agentGroup); 
             return agentGroup;
         }
 
-        // --- LOAD FILE .GLB & KARAKTER ---
+        // --- LOAD RUANGAN ---
         const loader = new GLTFLoader();
         loader.load('https://cdn.jsdelivr.net/gh/userdwyon/video-autopilot@main/office.glb', function (gltf) {
             const model = gltf.scene;
-            model.scale.set(1, 1, 1); // Ubah ke 2 kalau ruangannya kekecilan
+            model.scale.set(1, 1, 1); 
             model.position.set(0, 0, 0);
-            
             model.traverse((node) => {
                 if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; }
             });
@@ -103,55 +98,45 @@
             
             document.getElementById('loading').style.display = 'none';
 
-            // --- MASUKIN KARYAWAN KE DALAM RUANGAN ---
-            // Silakan ganti angka (x, y, z) di bawah buat mindahin posisi mereka
-            // Format: createAgent("Nama", "Warna", x, y, z)
+            // MASUKIN KARYAWAN (Sesuaikan X, Y, Z nya)
+            manager = createAgent("Manager", 0x42a5f5, -3, 0, 2);
+            writer = createAgent("Sinta", 0xab47bc, 2, 0, -2);
+            researcher = createAgent("Dewi", 0xf06292, -4, 0, -3);
+            player = createAgent("Budi", 0x66bb6a, 3, 0, 3);
+            editor = createAgent("Rina", 0xffca28, 0, 0, 4);
+            admin = createAgent("Joko", 0xef5350, 4, 0, 0);
+            designer = createAgent("Andi", 0xffa726, -2, 0, -4);
             
-            const manager = createAgent("Manager", 0x42a5f5, -3, 0, 2);
-            const writer = createAgent("Sinta", 0xab47bc, 2, 0, -2);
-            const researcher = createAgent("Dewi", 0xf06292, -4, 0, -3);
-            const player = createAgent("Budi", 0x66bb6a, 3, 0, 3);
-            const editor = createAgent("Rina", 0xffca28, 0, 0, 4);
-            const admin = createAgent("Joko", 0xef5350, 4, 0, 0);
-            const designer = createAgent("Andi", 0xffa726, -2, 0, -4);
+            isLoaded = true;
 
-            // --- ANIMASI KARYAWAN ---
-            const clock = new THREE.Clock();
-            function animateAgents() {
-                requestAnimationFrame(animateAgents);
-                const time = clock.getElapsedTime();
-
-                // Manager jalan mondar-mandir
-                manager.position.x = -3 + Math.sin(time * 1.5) * 2;
-                manager.rotation.y = Math.cos(time * 1.5) > 0 ? Math.PI/2 : -Math.PI/2;
-
-                // Sinta ngetik (badan goyang naik turun)
-                writer.position.y = Math.abs(Math.sin(time * 10)) * 0.1;
-
-                // Dewi mikir (muter pelan)
-                researcher.rotation.y = time * 0.5;
-
-                // Budi (bobbing)
-                player.position.y = Math.abs(Math.sin(time * 2)) * 0.2;
-
-                // Rina nge-render (goyang santai)
-                editor.rotation.z = Math.sin(time * 3) * 0.1;
-
-                // Joko cek HP (muter kiri kanan)
-                admin.rotation.y = Math.sin(time * 1) * 0.5;
-
-                // Andi (loncat-loncat kecil)
-                designer.position.y = Math.abs(Math.sin(time * 4)) * 0.5;
-
-                controls.update();
-                renderer.render(scene, camera);
-                labelRenderer.render(scene, camera);
-            }
-            animateAgents();
         }, undefined, function (error) {
-            console.error('Error:', error);
-            document.getElementById('loading').innerText = "❌ Gagal memuat file 3D.";
+            document.getElementById('loading').innerText = "❌ Gagal memuat file 3D (CDN Error).";
         });
+
+        // --- ANIMASI (DI LUAR LOADER BIAR GA BLANK) ---
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            if (isLoaded) {
+                if(manager) {
+                    manager.position.x = -3 + Math.sin(time * 1.5) * 2;
+                    manager.rotation.y = Math.cos(time * 1.5) > 0 ? Math.PI/2 : -Math.PI/2;
+                }
+                if(writer) writer.position.y = Math.abs(Math.sin(time * 10)) * 0.1;
+                if(researcher) researcher.rotation.y = time * 0.5;
+                if(player) player.position.y = Math.abs(Math.sin(time * 2)) * 0.2;
+                if(editor) editor.rotation.z = Math.sin(time * 3) * 0.1;
+                if(admin) admin.rotation.y = Math.sin(time * 1) * 0.5;
+                if(designer) designer.position.y = Math.abs(Math.sin(time * 4)) * 0.5;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
 
         window.addEventListener('resize', () => {
             const aspect = window.innerWidth / window.innerHeight;
