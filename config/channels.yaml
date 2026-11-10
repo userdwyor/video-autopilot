@@ -1,56 +1,14 @@
-# ── Channels ─────────────────────────────────────────────────────────────────
-# One block per channel/account. Clone a block to add a channel (Playbook §7).
-# `--channel <key>` selects which block to run. Per-channel keys override settings.yaml.
-
+# — Channels —
+# Tema Utama: Horor Komedi Lucu
 channels:
-
-  motivation:
-    name: "Daily Discipline"
-    niche: motivation
-    audience: "men & women 18–34 chasing self-improvement and discipline"
-    angle: "hard-truth, no-fluff motivation grounded in stoicism and action"
-    tone: "punchy, intense, cinematic"
-    voice: id-ID-GadisNeural        # overrides tts.edge_voice
-    visual_style: "cinematic, moody, slow-motion, urban, gym, nature, dramatic light"
-    music_mood: "epic, building, inspirational"
-    platforms: [youtube, tiktok, instagram, facebook]
-    series: false
+  horor_lucu:
+    name: "Horor Komedi Animasi"
+    niche: comedy_horror
+    audience: "Remaja & dewasa muda yang suka cerita seram tapi pengen ketawa"
+    angle: "Cerita hantu konyol, hantu takut sama manusia, atau kejadian mistis yang berakhir absurd"
+    tone: "Komedi, santai, tegang di awal, ngakak di akhir"
+    voice: id-ID-ArdiNeural
+    visual_style: "2D cartoon, cute ghost, funny monster, comic style, halloween background, spooky but cute"
+    music_mood: "playful spooky, funny halloween, comedy background"
+    platforms: [youtube, tiktok, instagram]
     posts_per_day: 1
-
-  money:
-    name: "Money Mechanics"
-    niche: finance
-    audience: "20–40 yr olds who want practical money + side-hustle tips"
-    angle: "one actionable money concept per video, plainly explained"
-    tone: "confident, clear, slightly contrarian"
-    voice: id-ID-GadisNeural
-    visual_style: "clean, modern, money, city, charts b-roll, lifestyle"
-    music_mood: "upbeat, modern, light"
-    platforms: [youtube, tiktok, instagram, facebook]
-    inject_disclaimer: finance     # pulls settings.compliance.disclaimers.finance
-    posts_per_day: 1
-
-  facts:
-    name: "Mind Blown Facts"
-    niche: psychology
-    audience: "general curious audience, all ages"
-    angle: "surprising psychology + science facts with a curiosity hook"
-    tone: "intriguing, friendly, fast-paced"
-    voice: id-ID-GadisNeural
-    visual_style: "abstract, brain, space, nature macro, satisfying visuals"
-    music_mood: "curious, playful, light electronic"
-    platforms: [youtube, tiktok, instagram, facebook]
-    posts_per_day: 1
-
-  # ── Template: copy, rename the key, change the fields ──
-  # newchannel:
-  #   name: ""
-  #   niche: history            # see Playbook §1 niche table
-  #   audience: ""
-  #   angle: ""
-  #   tone: ""
-  #   voice: en-US-AriaNeural
-  #   visual_style: ""
-  #   music_mood: ""
-  #   platforms: [youtube, tiktok, instagram, facebook]
-  #   posts_per_day: 1
