@@ -72,7 +72,7 @@
             agentGroup.position.set(x, y, z);
             
             // KITA GEDEIN KARAKTERNYA 4X LIPAT BIAR KELIATAN
-            agentGroup.scale.set(10, 10, 10); 
+            agentGroup.scale.set(2, 2, 2); 
 
             const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 0.8, 4, 8), new THREE.MeshStandardMaterial({ color: color }));
             body.position.y = 0.8; body.castShadow = true; agentGroup.add(body);
@@ -101,13 +101,13 @@
             document.getElementById('loading').style.display = 'none';
 
             // KARAKTER DITARUH DI TENGAH-TENGAH GEDUNG
-            manager = createAgent("Manager", 0x42a5f5, -5, 0, 5);
-            writer = createAgent("Sinta", 0xab47bc, 5, 0, 5);
-            researcher = createAgent("Dewi", 0xf06292, -5, 0, -5);
-            player = createAgent("Budi", 0x66bb6a, 5, 0, -5);
-            editor = createAgent("Rina", 0xffca28, 0, 0, 0);
-            admin = createAgent("Joko", 0xef5350, 0, 0, 10);
-            designer = createAgent("Andi", 0xffa726, 10, 0, 0);
+            manager = createAgent("Manager", 0x42a5f5, -10, 2, 10);
+            writer = createAgent("Sinta", 0xab47bc, 10, 2, 10);
+            researcher = createAgent("Dewi", 0xf06292, -10, 2, -10);
+            player = createAgent("Budi", 0x66bb6a, 10, 2, -10);
+            editor = createAgent("Rina", 0xffca28, 0, 2, 0);
+            admin = createAgent("Joko", 0xef5350, 0, 2, 15);
+            designer = createAgent("Andi", 0xffa726, 15, 2, 0);
             
             isLoaded = true;
         }, undefined, function (error) {
@@ -121,7 +121,7 @@
 
             if (isLoaded) {
                 if(manager) {
-                    manager.position.x = -5 + Math.sin(time * 1.5) * 3;
+                    manager.position.x = -10 + Math.sin(time * 1.5) * 3;
                     manager.rotation.y = Math.cos(time * 1.5) > 0 ? Math.PI/2 : -Math.PI/2;
                 }
                 if(writer) writer.position.y = Math.abs(Math.sin(time * 10)) * 0.3;
