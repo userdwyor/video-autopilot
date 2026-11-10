@@ -67,7 +67,6 @@ jobs:
           FAL_KEY: ${{ secrets.FAL_KEY }}
           REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
           AYRSHARE_API_KEY: ${{ secrets.AYRSHARE_API_KEY }}
-          UPLOAD_POST_API_KEY: ${{ secrets.UPLOAD_POST_API_KEY }}
           UPLOAD_POST_USER: ${{ secrets.UPLOAD_POST_USER }}
         run: |
           DRY=""
