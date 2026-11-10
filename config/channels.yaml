@@ -15,7 +15,7 @@ channels:
     music_mood: "epic, building, inspirational"
     platforms: [youtube, tiktok, instagram, facebook]
     series: false
-    posts_per_day: 2
+    posts_per_day: 1
 
   money:
     name: "Money Mechanics"
