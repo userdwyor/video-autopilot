@@ -83,5 +83,5 @@ st.write("Geser layar pakai jari buat muter ruangannya!")
 import streamlit.components.v1 as components
 import os
 
-components.iframe("https://userdwyor.github.io/video-autopilot/office.html", height=500, scrolling=True)
+st.link_button("🚀 Buka Kantor Virtual 3D (Full Screen)", "https://userdwyon.github.io/video-autopilot/office.html", use_container_width=True)
 st.caption("Dibuat dengan 💻 dan ☕ oleh Bos Besar.")
