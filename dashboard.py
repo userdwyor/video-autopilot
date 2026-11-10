@@ -75,4 +75,18 @@ if st.button("BUAT VIDEO SEKARANG!", use_container_width=True, type="primary"):
         st.code(response.text) # INI BAKAL NAMPILIN ERROR ASLINYA
 
 st.divider()
+st.divider()
+st.subheader("🏢 Kantor Virtual 3D")
+st.write("Geser layar pakai jari buat muter ruangannya!")
+
+# Baca file office.html dan tampilin di dalam dashboard
+import streamlit.components.v1 as components
+import os
+
+if os.path.exists("office.html"):
+    with open("office.html", "r", encoding="utf-8") as f:
+        html_data = f.read()
+    components.html(html_data, height=500, scrolling=True)
+else:
+    st.error("File office.html nggak ketemu di repo.")
 st.caption("Dibuat dengan 💻 dan ☕ oleh Bos Besar.")
