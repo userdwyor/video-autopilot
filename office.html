@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent 3D Office</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; }
+        #info { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-family: sans-serif; z-index: 100; }
+        .loading { font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="info"><h2>🏢 Kantor Virtual Tim AI</h2><p>Geser layar untuk melihat ruangan (Rotate)</p></div>
+    
+    <!-- Import Three.js -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Setup Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x20202a);
+        scene.fog = new THREE.Fog(0x20202a, 10, 50);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(15, 15, 15);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // Controls (Biar bisa digeser pakai jari)
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 - 0.1; // Biar ga bisa tembus lantai
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Lantai (Floor)
+        const floorGeo = new THREE.PlaneGeometry(30, 30);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x3a3a4a, roughness: 0.8 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // Grid Lantai
+        const grid = new THREE.GridHelper(30, 30, 0x555555, 0x444444);
+        scene.add(grid);
+
+        // Fungsi Bikin Meja
+        function createDesk(x, z, color, agentName) {
+            const group = new THREE.Group();
+
+            // Kaki Meja
+            const legGeo = new THREE.BoxGeometry(0.2, 1.5, 0.2);
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const positions = [[-2, 0.75, -1], [2, 0.75, -1], [-2, 0.75, 1], [2, 0.75, 1]];
+            positions.forEach(pos => {
+                const leg = new THREE.Mesh(legGeo, legMat);
+                leg.position.set(pos[0], pos[1], pos[2]);
+                leg.castShadow = true;
+                group.add(leg);
+            });
+
+            // Alas Meja
+            const topGeo = new THREE.BoxGeometry(4.5, 0.2, 2.5);
+            const topMat = new THREE.MeshStandardMaterial({ color: color });
+            const top = new THREE.Mesh(topGeo, topMat);
+            top.position.y = 1.5;
+            top.castShadow = true;
+            top.receiveShadow = true;
+            group.add(top);
+
+            // Monitor
+            const screenGeo = new THREE.BoxGeometry(1.5, 1, 0.1);
+            const screenMat = new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 0.5 });
+            const screen = new THREE.Mesh(screenGeo, screenMat);
+            screen.position.set(0, 2.2, -0.5);
+            screen.rotation.x = -0.1;
+            group.add(screen);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        // Bikin 5 Meja untuk 5 Agent
+        createDesk(-8, -8, 0xff4444, "Manager");    // Merah
+        createDesk(8, -8, 0x4444ff, "Scriptwriter"); // Biru
+        createDesk(-8, 8, 0x44ff44, "Media");       // Hijau
+        createDesk(8, 8, 0xffff44, "Editor");       // Kuning
+        createDesk(0, 0, 0xff44ff, "Publisher");    // Ungu (Di tengah)
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize (buat layar HP)
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
