@@ -37,6 +37,8 @@ def gather_visuals(cfg: dict, script: dict, out_dir: Path, duration: float) -> l
         try:
             if provider == "pexels":
                 paths.append(_pexels_video(q, dest, cfg, used_ids))
+            elif provider == "pollinations":
+                paths.append(_pollinations_image(q, dest, cfg))
             elif provider in ("fal", "replicate"):
                 paths.append(_ai_image(q, dest, cfg, provider))
             else:
@@ -117,4 +119,19 @@ def _ai_image(prompt: str, dest: Path, cfg: dict, provider: str) -> Path:
         out_field = r.json().get("output")
         img_url = out_field[0] if isinstance(out_field, list) else out_field
     out.write_bytes(requests.get(img_url, timeout=120).content)
+    return out
+def _pollinations_image(query: str, dest: Path, cfg: dict) -> Path:
+    import urllib.parse
+    import random
+    
+    style = cfg["visuals"].get("ai_image_style", "2D cartoon, comic style")
+    full_prompt = f"{query}, {style}"
+    encoded_prompt = urllib.parse.quote(full_prompt)
+    
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1920&nologo=true&seed={random.randint(1, 1000000)}"
+    
+    out = dest.with_suffix(".png")
+    r = requests.get(url, timeout=60)
+    r.raise_for_status()
+    out.write_bytes(r.content)
     return out
