@@ -23,10 +23,10 @@ tts:
   elevenlabs_stability: 0.4
 
 visuals:
-  provider: pexels             # pexels (free stock) | fal | replicate (AI images)
-  clips_per_video: 12          # ~1 visual per 2–3s of a 25–35s video
-  orientation: portrait        # portrait b-roll for 9:16
-  ai_image_style: "cinematic, high detail, dramatic lighting, vertical 9:16"
+  provider: pollinations
+  clips_per_video: 10
+  orientation: portrait
+  ai_image_style: "2D cartoon, funny ghost, cute spooky, halloween comic style, bright colors, cartoon character"
 
 captions:
   enabled: true
